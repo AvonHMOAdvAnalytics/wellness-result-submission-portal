@@ -1,0 +1,2 @@
+#ignore the secrets file containing the DB credentials
+secrets.toml
