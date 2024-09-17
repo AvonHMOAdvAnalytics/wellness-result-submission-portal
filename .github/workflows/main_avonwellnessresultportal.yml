@@ -64,4 +64,4 @@ jobs:
         with:
           app-name: 'avonwellnessresultportal'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_61C4D07EB40749F4B15A361CB0ADECFE }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_85BCCAE2ECE740FAB94F691B6B71FFD2 }}
