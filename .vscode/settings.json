@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/bd85ab98-aaf0-405f-a800-ff8f87930c69/resourceGroups/AvonAdvAnalytics/providers/Microsoft.Web/sites/avonwellnessresultportal",
+    "appService.deploySubpath": "."
+}
