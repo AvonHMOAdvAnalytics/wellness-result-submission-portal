@@ -17,16 +17,34 @@ st.set_page_config(page_title="Provider Wellness Result Submission Portal", page
 image = Image.open('image.png')
 st.image(image, use_column_width=True)
 
+server = os.environ.get('servername')
+database = os.environ.get('db_name')
+username = os.environ.get('db_username')
+password = os.environ.get('db_password')
+conn_str = os.environ.get('conn_str')
+
+
 conn = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};SERVER='
-        +st.secrets['server']
+        + server
         +';DATABASE='
-        +st.secrets['database']
+        + database
         +';UID='
-        +st.secrets['username']
+        + username
         +';PWD='
-        +st.secrets['password']
+        + password
         )
+
+# conn = pyodbc.connect(
+#         'DRIVER={ODBC Driver 17 for SQL Server};SERVER='
+#         +st.secrets['server']
+#         +';DATABASE='
+#         +st.secrets['database']
+#         +';UID='
+#         +st.secrets['username']
+#         +';PWD='
+#         +st.secrets['password']
+#         )
 
 query1 = "SELECT * from vw_wellness_enrollee_portal"
 query2 = 'select MemberNo, MemberName, Client, email, state, selected_provider, Wellness_benefits, selected_date, selected_session, date_submitted,\
@@ -132,7 +150,8 @@ if st.session_state['authentication_status']:
             #store the uploaded files in a blob storage and return the url
 
             # Initialize the BlobServiceClient
-            blob_service_client = BlobServiceClient.from_connection_string(st.secrets['conn_str'])
+            # blob_service_client = BlobServiceClient.from_connection_string(st.secrets['conn_str'])
+            blob_service_client = BlobServiceClient.from_connection_string(conn_str)
             # Create a single container for all uploaded images
             container_name = 'annual-wellness-results'
             container_client = blob_service_client.get_container_client(container_name)
@@ -179,7 +198,8 @@ if st.session_state['authentication_status']:
 
                     #send an email to the enrollee with an attachment of the test results
                     myemail = 'noreply@avonhealthcare.com'
-                    password = st.secrets['emailpassword']
+                    # password = st.secrets['emailpassword']
+                    password = os.environ.get('emailpassword')
                     email = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['email'].values[0]
                     bcc_email = 'ademola.atolagbe@avonhealthcare.com'
                     # email = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['email'].values[0]
