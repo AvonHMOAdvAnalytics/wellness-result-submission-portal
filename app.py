@@ -47,9 +47,10 @@ conn = pyodbc.connect(
 #         )
 
 query1 = "SELECT * from vw_wellness_enrollee_portal"
-query2 = 'select MemberNo, MemberName, Client, email, state, selected_provider, Wellness_benefits, selected_date, selected_session, date_submitted,\
-            IssuedPACode, PA_Tests, PA_Provider, PAissueDate\
-            FROM tbl_annual_wellness_enrollee_data'
+query2 = "select MemberNo, MemberName, Client, email, state, selected_provider, Wellness_benefits, selected_date, selected_session, date_submitted,\
+        IssuedPACode, PA_Tests, PA_Provider, PAissueDate\
+        FROM tbl_annual_wellness_enrollee_data\
+        where IssuedPACode is not null and date_submitted >= '2024-10-01'"
 query3 = 'select a.*, name as ProviderName, Code\
         from updated_wellness_providers a\
         left join [dbo].[tbl_ProviderList_stg] b\
@@ -112,9 +113,12 @@ if st.session_state['authentication_status']:
     st.sidebar.write("Welcome to the Provider Wellness Result Submission Portal")
     # st.sidebar.write("Please select an option from the sidebar to proceed")
     selected_option = st.sidebar.radio(label="Please select an option to proceed",options=['View Wellness Enrollees and Benefits', 'Submit Wellness Results'])
-    provider_df = filled_wellness_df[filled_wellness_df['ProviderName'] == st.session_state['ProviderName']]
+    if st.session_state['ProviderName'] == 'CLINA LANCET LABOURATORIES':
+        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CERBA LANCET NIGERIA')]
+    else:
+        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'] == st.session_state['ProviderName']]
         #return only the 'MemberNo', 'MemberName', and 'Wellness_benefits' columns
-    provider_df = provider_df[['MemberNo', 'MemberName', 'Wellness_benefits']]
+    provider_df = provider_df[['MemberNo', 'MemberName', 'IssuedPACode', 'Wellness_benefits']]
     #create a new column to display if an enrollee result has been submitted or not
     provider_df['SubmissionStatus'] = provider_df['MemberNo'].apply(
     lambda x: 'Submitted' if x in submitted_result_df['memberno'].values else 'Not Submitted')
