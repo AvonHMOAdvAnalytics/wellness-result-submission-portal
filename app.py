@@ -115,6 +115,8 @@ if st.session_state['authentication_status']:
     selected_option = st.sidebar.radio(label="Please select an option to proceed",options=['View Wellness Enrollees and Benefits', 'Submit Wellness Results'])
     if st.session_state['ProviderName'] == 'CLINA LANCET LABOURATORIES':
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CERBA LANCET NIGERIA')]
+    elif st.session_state['ProviderName'] == 'AVON MEDICAL PRACTICE':
+        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('AVON')]
     else:
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'] == st.session_state['ProviderName']]
         #return only the 'MemberNo', 'MemberName', and 'Wellness_benefits' columns
