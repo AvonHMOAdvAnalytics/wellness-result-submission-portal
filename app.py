@@ -51,10 +51,10 @@ query2 = "select MemberNo, MemberName, Client, email, state, selected_provider, 
         IssuedPACode, PA_Tests, PA_Provider, PAissueDate\
         FROM tbl_annual_wellness_enrollee_data\
         where IssuedPACode is not null and date_submitted >= '2024-10-01'"
-query3 = 'select a.*, name as ProviderName, Code\
+query3 = 'select a.*, name as ProviderName\
         from updated_wellness_providers a\
         left join [dbo].[tbl_ProviderList_stg] b\
-        on a.provider_name = b.name'
+        on a.code = b.code'
 query4 = 'SELECT * FROM tbl_enrollee_wellness_result_data'
 
 @st.cache_data(ttl = dt.timedelta(hours=4))
