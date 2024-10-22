@@ -127,6 +127,8 @@ if st.session_state['authentication_status']:
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('ABACHA')]
     else:
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'] == st.session_state['ProviderName']]
+
+        # st.write(st.session_state['ProviderName'])
         #return only the 'MemberNo', 'MemberName', and 'Wellness_benefits' columns
     provider_df = provider_df[['MemberNo', 'MemberName', 'IssuedPACode', 'Wellness_benefits']]
     #create a new column to display if an enrollee result has been submitted or not
