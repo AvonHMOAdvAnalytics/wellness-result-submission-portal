@@ -125,6 +125,11 @@ if st.session_state['authentication_status']:
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('JJANED')]
     elif st.session_state['ProviderName'] ==  'YOBE STATE SPECIALIST HOSPITAL, DAMATURU (GEN. SANNI ABACHA SPECIALIST HOSPITAL, DAMATURU)':
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('ABACHA')]
+    elif st.session_state['ProviderName'] ==  'ASHMED SPECIALIST':
+        provider_df = filled_wellness_df[
+            filled_wellness_df['ProviderName'].str.contains('ASHMED SPECIALIST HOSPITAL ZAMFARA') |
+            filled_wellness_df['ProviderName'].str.contains('ASHMED HOSPITAL SPECIALIST SOKOTO')
+            ]
     else:
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'] == st.session_state['ProviderName']]
 
