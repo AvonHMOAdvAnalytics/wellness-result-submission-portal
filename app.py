@@ -48,9 +48,9 @@ conn = pyodbc.connect(
 
 query1 = "SELECT * from vw_wellness_enrollee_portal"
 query2 = "select MemberNo, MemberName, Client, email, state, selected_provider, Wellness_benefits, selected_date, selected_session, date_submitted,\
-        IssuedPACode, PA_Tests, PA_Provider, PAissueDate\
+        IssuedPACode, PA_Tests, PA_Provider, PAIssueDate\
         FROM tbl_annual_wellness_enrollee_data\
-        where IssuedPACode is not null and date_submitted >= '2024-10-01'"
+        where IssuedPACode is not null and PAIssueDate >= '2024-10-01'"
 query3 = 'select a.*, name as ProviderName\
         from updated_wellness_providers a\
         left join [dbo].[tbl_ProviderList_stg] b\
@@ -213,65 +213,83 @@ if st.session_state['authentication_status']:
                 member_folder_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{member_folder}"
 
                 if st.button("Submit Results"):
-                    #write the details of the enrollee submission to a table in the database    
-                    cursor = conn.cursor()
-                    cursor.execute("INSERT INTO tbl_enrollee_wellness_result_data (\
-                                memberno, membername, providername, pacode, tests_conducted, test_date, test_result_link)\
-                                    VALUES (?, ?, ?, ?, ?, ?, ?)", member_no, name, st.session_state['ProviderName'], pa_code, ', '.join(tests_conducted), test_date, member_folder_url)
-                    conn.commit()
+                    #initialise an empty list to store empty fields
+                    empty_fields = []
+                    #check if the PACode field is empty
+                    if not pa_code:
+                        empty_fields.append('PA Code')
+                    #check if the tests conducted field is empty
+                    if len(tests_conducted) == 0:
+                        empty_fields.append('Tests Conducted')
+                    #check if the test date field is empty
+                    if not test_date:
+                        empty_fields.append('Test Date')
+                    #check if the uploaded file field is empty
+                    if not uploaded_file:
+                        empty_fields.append('Uploaded File')
+                    #if any of the fields are empty, display an error message
+                    if len(empty_fields) > 0:
+                        st.error(f"The following field(s) are compulsory, Kindly provide the information to proceed: {', '.join(empty_fields)}")
+                    else:
+                        #write the details of the enrollee submission to a table in the database    
+                        cursor = conn.cursor()
+                        cursor.execute("INSERT INTO tbl_enrollee_wellness_result_data (\
+                                    memberno, membername, providername, pacode, tests_conducted, test_date, test_result_link)\
+                                        VALUES (?, ?, ?, ?, ?, ?, ?)", member_no, name, st.session_state['ProviderName'], pa_code, ', '.join(tests_conducted), test_date, member_folder_url)
+                        conn.commit()
 
-                    #send an email to the enrollee with an attachment of the test results
-                    myemail = 'noreply@avonhealthcare.com'
-                    # password = st.secrets['emailpassword']
-                    password = os.environ.get('emailpassword')
-                    email = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['email'].values[0]
-                    bcc_email = 'ademola.atolagbe@avonhealthcare.com'
-                    # email = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['email'].values[0]
-                    subject = "AVON HMO ANNUAL WELLNESS TEST RESULTS"
-                    body = f'''
-                            Dear {name},<br><br>
-                            Trust this message meets you well.<br><br>
-                            Following your recent wellness test at {st.session_state['ProviderName']} on {test_date},<br>
-                            Please find attached the results of the wellness tests conducted on you.<br><br>
-                            You are advised to review the results and consult with your primary healthcare provider for further advice.<br><br>
-                            Please ensure that you follow the advice provided by your healthcare provider to maintain a healthy lifestyle.<br><br>
-                            Best Regards,<br>
-                            AVON HMO Medical Services
-                            '''
-                    attachment = uploaded_file
-                    #send_email(email, subject, body, attachment)
-                    try:
-                        server = smtplib.SMTP('smtp.office365.com', 587)
-                        server.starttls()
+                        #send an email to the enrollee with an attachment of the test results
+                        myemail = 'noreply@avonhealthcare.com'
+                        # password = st.secrets['emailpassword']
+                        password = os.environ.get('emailpassword')
+                        email = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['email'].values[0]
+                        bcc_email = 'ademola.atolagbe@avonhealthcare.com'
+                        # email = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['email'].values[0]
+                        subject = "AVON HMO ANNUAL WELLNESS TEST RESULTS"
+                        body = f'''
+                                Dear {name},<br><br>
+                                Trust this message meets you well.<br><br>
+                                Following your recent wellness test at {st.session_state['ProviderName']} on {test_date},<br>
+                                Please find attached the results of the wellness tests conducted on you.<br><br>
+                                You are advised to review the results and consult with your primary healthcare provider for further advice.<br><br>
+                                Please ensure that you follow the advice provided by your healthcare provider to maintain a healthy lifestyle.<br><br>
+                                Best Regards,<br>
+                                AVON HMO Medical Services
+                                '''
+                        attachment = uploaded_file
+                        #send_email(email, subject, body, attachment)
+                        try:
+                            server = smtplib.SMTP('smtp.office365.com', 587)
+                            server.starttls()
 
-                        #login to outlook account
-                        server.login(myemail, password)
+                            #login to outlook account
+                            server.login(myemail, password)
 
-                        #create a MIMETesxt object for the email message
-                        msg = MIMEMultipart()
-                        msg['From'] = 'AVON HMO Medical Services'
-                        msg['To'] = email
-                        msg['Bcc'] = bcc_email
-                        msg['Subject'] = subject
-                        msg.attach(MIMEText(body, 'html'))
-                        #attach the file to the email
-                        for file in uploaded_file:
-                            file.seek(0)
-                            file_data = file.read()
-                            part = MIMEBase('application', 'octet-stream')
-                            part.set_payload(file_data)
-                            encoders.encode_base64(part)
-                            part.add_header('Content-Disposition', f'attachment; filename={file.name}')
-                            msg.attach(part)
+                            #create a MIMETesxt object for the email message
+                            msg = MIMEMultipart()
+                            msg['From'] = 'AVON HMO Medical Services'
+                            msg['To'] = email
+                            msg['Bcc'] = bcc_email
+                            msg['Subject'] = subject
+                            msg.attach(MIMEText(body, 'html'))
+                            #attach the file to the email
+                            for file in uploaded_file:
+                                file.seek(0)
+                                file_data = file.read()
+                                part = MIMEBase('application', 'octet-stream')
+                                part.set_payload(file_data)
+                                encoders.encode_base64(part)
+                                part.add_header('Content-Disposition', f'attachment; filename={file.name}')
+                                msg.attach(part)
 
-                        #send the email
-                        recipient = [email, bcc_email]
-                        server.sendmail(myemail, recipient, msg.as_string())
-                        server.quit()
-                    except Exception as e:
-                        st.error(f"An error occurred: {e}")
-                    
-                    st.success('Results Submitted Successfully a copy of the results has been sent to the enrollee')    
+                            #send the email
+                            recipient = [email, bcc_email]
+                            server.sendmail(myemail, recipient, msg.as_string())
+                            server.quit()
+                        except Exception as e:
+                            st.error(f"An error occurred: {e}")
+                        
+                        st.success('Results Submitted Successfully a copy of the results has been sent to the enrollee')    
         else:
             st.error("Select an Enrollee to Proceed")    
 
