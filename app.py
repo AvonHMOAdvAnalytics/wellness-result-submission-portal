@@ -67,7 +67,7 @@ def get_data_from_sql():
 
 wellness_df, wellness_providers, filled_wellness_df = get_data_from_sql()
 
-filled_wellness_df['ProviderName'] = filled_wellness_df['selected_provider'].str.split('-').str[0].str.strip()
+filled_wellness_df['ProviderName'] = filled_wellness_df['PA_Provider'].str.split('-').str[0].str.strip()
 filled_wellness_df['MemberNo'] = filled_wellness_df['MemberNo'].astype(str)
 
 submitted_result_df = pd.read_sql(query4, conn)
@@ -133,12 +133,14 @@ if st.session_state['authentication_status']:
             filled_wellness_df['ProviderName'].str.contains('ASHMED SPECIALIST HOSPITAL ZAMFARA') |
             filled_wellness_df['ProviderName'].str.contains('ASHMED HOSPITAL SPECIALIST SOKOTO')
             ]
+    elif st.session_state['ProviderName'] ==  'CLINIX HEALTHCARE':
+        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CLINIX')]
     else:
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'] == st.session_state['ProviderName']]
 
         # st.write(st.session_state['ProviderName'])
         #return only the 'MemberNo', 'MemberName', and 'Wellness_benefits' columns
-    provider_df = provider_df[['MemberNo', 'MemberName', 'IssuedPACode', 'Wellness_benefits']]
+    provider_df = provider_df[['MemberNo', 'MemberName', 'IssuedPACode', 'PA_Tests']]
     #create a new column to display if an enrollee result has been submitted or not
     provider_df['SubmissionStatus'] = provider_df['MemberNo'].apply(
     lambda x: 'Submitted' if x in submitted_result_df['memberno'].values else 'Not Submitted')
