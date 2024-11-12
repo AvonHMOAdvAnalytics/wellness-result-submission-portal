@@ -116,7 +116,8 @@ if st.session_state['authentication_status']:
     if st.session_state['ProviderName'] == 'CLINA LANCET LABOURATORIES':
         provider_df = filled_wellness_df[
             filled_wellness_df['ProviderName'].str.contains('CERBA') |
-            filled_wellness_df['ProviderName'].str.contains('UBA Head')
+            filled_wellness_df['ProviderName'].str.contains('UBA Head') |
+            filled_wellness_df['ProviderName'].str.contains('CLINA') 
             ]
     elif st.session_state['ProviderName'] == 'AVON MEDICAL PRACTICE':
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('AVON')]
