@@ -134,8 +134,8 @@ if st.session_state['authentication_status']:
             filled_wellness_df['ProviderName'].str.contains('ASHMED SPECIALIST HOSPITAL ZAMFARA') |
             filled_wellness_df['ProviderName'].str.contains('ASHMED HOSPITAL SPECIALIST SOKOTO')
             ]
-    elif st.session_state['ProviderName'] ==  'CLINIX HEALTHCARE':
-        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CLINIX')]
+    # elif st.session_state['ProviderName'] ==  'CLINIX HEALTHCARE':
+    #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CLINIX')]
     else:
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'] == st.session_state['ProviderName']]
 
