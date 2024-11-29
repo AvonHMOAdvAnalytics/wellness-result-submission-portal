@@ -119,10 +119,10 @@ if st.session_state['authentication_status']:
             filled_wellness_df['ProviderName'].str.contains('UBA Head') |
             filled_wellness_df['ProviderName'].str.contains('CLINA') 
             ]
-    elif st.session_state['ProviderName'] == 'AVON MEDICAL PRACTICE':
-        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('AVON')]
-    elif st.session_state['ProviderName'] == 'UNION DIAGNOSTICS AND CLINICAL SERVICES':
-        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('UNION')]
+    # elif st.session_state['ProviderName'] == 'AVON MEDICAL PRACTICE':
+    #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('AVON')]
+    # elif st.session_state['ProviderName'] == 'UNION DIAGNOSTICS AND CLINICAL SERVICES':
+    #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('UNION')]
     elif st.session_state['ProviderName'] == 'CITRON HEALTH LIMITED':
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CITRON')]
     elif st.session_state['ProviderName'] ==  'JJANED SPECIALIST HOSPITAL':
