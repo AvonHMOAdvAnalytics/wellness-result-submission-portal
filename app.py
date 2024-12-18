@@ -125,8 +125,8 @@ if st.session_state['authentication_status']:
     #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('UNION')]
     elif st.session_state['ProviderName'] == 'CITRON HEALTH LIMITED':
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CITRON')]
-    elif st.session_state['ProviderName'] ==  'JJANED SPECIALIST HOSPITAL':
-        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('JJANED')]
+    # elif st.session_state['ProviderName'] ==  'JJANED SPECIALIST HOSPITAL':
+    #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('JJANED')]
     elif st.session_state['ProviderName'] ==  'YOBE STATE SPECIALIST HOSPITAL, DAMATURU (GEN. SANNI ABACHA SPECIALIST HOSPITAL, DAMATURU)':
         provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('ABACHA')]
     elif st.session_state['ProviderName'] ==  'ASHMED SPECIALIST':
@@ -189,7 +189,7 @@ if st.session_state['authentication_status']:
 
                 # Get the current year and create a subfolder for each year in each provider folder
                 current_year = datetime.now().year
-                year_folder = f"{client_name}/{current_year}/{provider_name}"
+                year_folder = f"{provider_name}/{current_year}/{client_name}"
                 member_folder = f"{year_folder}/{member}"
 
                 # List to hold the URLs of uploaded files
