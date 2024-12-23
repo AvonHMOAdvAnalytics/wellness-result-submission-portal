@@ -123,8 +123,8 @@ if st.session_state['authentication_status']:
     #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('AVON')]
     # elif st.session_state['ProviderName'] == 'UNION DIAGNOSTICS AND CLINICAL SERVICES':
     #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('UNION')]
-    elif st.session_state['ProviderName'] == 'CITRON HEALTH LIMITED':
-        provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CITRON')]
+    # elif st.session_state['ProviderName'] == 'CITRON HEALTH LIMITED':
+    #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('CITRON')]
     # elif st.session_state['ProviderName'] ==  'JJANED SPECIALIST HOSPITAL':
     #     provider_df = filled_wellness_df[filled_wellness_df['ProviderName'].str.contains('JJANED')]
     elif st.session_state['ProviderName'] ==  'YOBE STATE SPECIALIST HOSPITAL, DAMATURU (GEN. SANNI ABACHA SPECIALIST HOSPITAL, DAMATURU)':
