@@ -357,7 +357,7 @@ if st.session_state['authentication_status'] and st.session_state['username'].st
 
 #a different journey for the claims team
 elif st.session_state['authentication_status'] and st.session_state['username'].startswith('claim'):
-    st.title("Provider Wellness Result Review Portal")
+    st.markdown("<h1 style='color: purple; text-align: center;'>Provider Wellness Result Review Portal</h1>", unsafe_allow_html=True)
     st.write(f"You are currently logged in as {st.session_state['ProviderName']} ({st.session_state['username']})")
     st.sidebar.title("Navigation")
     st.sidebar.write("Welcome to the Provider Wellness Result Review Portal")
@@ -372,10 +372,10 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
     selected_client = filled_wellness_df[filled_wellness_df['MemberNo'] == selected_memberid]['Client'].values[0]
     selected_test = filled_wellness_df[filled_wellness_df['MemberNo'] == selected_memberid]['PA_Tests'].values[0]
     pa_code = filled_wellness_df[filled_wellness_df['MemberNo'] == selected_memberid]['IssuedPACode'].values[0]
-    st.markdown(f"### Test Results for {selected_member}")
-    st.markdown(f"#### Client: {selected_client}")
-    st.markdown(f"#### PA Code Issued to Provider: {pa_code}")
-    st.markdown(f"#### Wellness Tests PA Code was Issued for: {selected_test}")
+    st.markdown(f"<h3 style='color: green;'>Test Results for {selected_member}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h4><span style='color: purple;'>Client:</span> {selected_client}</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h4><span style='color: purple;'>PA Code Issued to Provider:</span> {pa_code}</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h4><span style='color: purple;'>Wellness Tests PA Code was Issued for:</span> {selected_test}</h4>", unsafe_allow_html=True)
     # blob_service_client = BlobServiceClient.from_connection_string(conn_str)
     display_member_results(conn_str, 'annual-wellness-results', selected_provider, selected_client, selected_memberid)
     
