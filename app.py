@@ -92,7 +92,62 @@ def login_user(username,password):
             return None, None, None
     else:
         return None, None, None
-    # return None, None
+
+def display_member_results(conn_str, container_name, selected_provider, selected_client, selected_member):
+    """
+    Fetch and display test results for a selected member from Azure Blob Storage.
+
+    Args:
+        conn_str (str): Connection string for the Azure Blob Storage account.
+        container_name (str): Name of the Azure Blob container storing the results.
+        selected_provider (str): Name of the selected provider.
+        selected_client (str): Name of the selected client.
+        selected_member (str): Member ID of the selected member.
+
+    Returns:
+        None: Displays result links directly on the Streamlit app.
+    """
+    try:
+        # Initialize the BlobServiceClient
+        blob_service_client = BlobServiceClient.from_connection_string(conn_str)
+        container_client = blob_service_client.get_container_client(container_name)
+
+        # Format the folder path based on provider, year, client, and member
+        provider = selected_provider.replace(" ", "").lower()
+        client_name = selected_client.replace(" ", "").lower()
+        current_year = datetime.now().year - 1
+        selected_member = selected_member.strip()
+        member_folder = f"{provider}/{current_year}/{client_name}/{selected_member}"
+
+        # List blobs in the member folder
+        blobs = container_client.list_blobs(name_starts_with=member_folder)
+
+        # Collect and display blob URLs
+        result_links = []
+        for blob in blobs:
+            blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob.name}"
+            result_links.append(f'<a href="{blob_url}" target="_blank">{blob.name.split("/")[-1]}</a>')
+
+        # Display the results
+        if result_links:
+            for link in result_links:
+                st.markdown(link, unsafe_allow_html=True)
+        else:
+            st.warning("No test results found for the selected member.")
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+
+def logout():
+    """
+    Logs out the current user by resetting session state variables
+    and triggering a page reload.
+    """
+    if st.sidebar.button('Logout'):
+        st.session_state['ProviderName'] = None
+        st.session_state['username'] = None
+        st.session_state['authentication_status'] = None
+        st.experimental_rerun()
 
 # Initialize session state variables if they don't exist
 if 'authentication_status' not in st.session_state:
@@ -104,7 +159,8 @@ if 'username' not in st.session_state:
 if 'password' not in st.session_state:
     st.session_state['password'] = None
 
-if st.session_state['authentication_status']:
+#check if user is authenticated and username startswith '234'
+if st.session_state['authentication_status'] and st.session_state['username'].startswith('234'):
     st.title("Provider Wellness Result Submission Portal")
     st.write(f"You are currently logged in as {st.session_state['ProviderName']} ({st.session_state['username']})")
 
@@ -296,12 +352,57 @@ if st.session_state['authentication_status']:
         else:
             st.error("Select an Enrollee to Proceed")    
 
-    with st.sidebar:
-        if st.button('Logout'):
-            st.session_state['ProviderName'] = None
-            st.session_state['username'] = None
-            st.session_state['authentication_status'] = None
-            st.experimental_rerun()
+    #add a logout button to the sidebar
+    logout()
+
+#a different journey for the claims team
+elif st.session_state['authentication_status'] and st.session_state['username'].startswith('claim'):
+    st.title("Provider Wellness Result Review Portal")
+    st.write(f"You are currently logged in as {st.session_state['ProviderName']} ({st.session_state['username']})")
+    st.sidebar.title("Navigation")
+    st.sidebar.write("Welcome to the Provider Wellness Result Review Portal")
+    st.sidebar.write("Please select a Provider to view Submitted Wellness Results")
+    wellness_providers_sub = pd.read_sql(query4, conn)
+    wellness_providers_sub['memberno'] = wellness_providers_sub['memberno'].astype(str)
+    #create a new column that joins the memberno and name seperated by a hyphen
+    wellness_providers_sub['member'] = wellness_providers_sub['memberno'].str.cat(wellness_providers_sub['membername'], sep=' - ')
+    selected_provider = st.sidebar.selectbox('Select Provider', options=wellness_providers_sub['providername'].unique())
+    selected_member = st.sidebar.selectbox('Select Member', options=wellness_providers_sub[wellness_providers_sub['providername'] == selected_provider]['member'].unique())
+    selected_memberid = selected_member.split(' - ')[0]
+    selected_client = filled_wellness_df[filled_wellness_df['MemberNo'] == selected_memberid]['Client'].values[0]
+    selected_test = filled_wellness_df[filled_wellness_df['MemberNo'] == selected_memberid]['PA_Tests'].values[0]
+    pa_code = filled_wellness_df[filled_wellness_df['MemberNo'] == selected_memberid]['IssuedPACode'].values[0]
+    st.markdown(f"### Test Results for {selected_member}")
+    st.markdown(f"#### Client: {selected_client}")
+    st.markdown(f"#### PA Code Issued to Provider: {pa_code}")
+    st.markdown(f"#### Wellness Tests PA Code was Issued for: {selected_test}")
+    # blob_service_client = BlobServiceClient.from_connection_string(conn_str)
+    display_member_results(conn_str, 'annual-wellness-results', selected_provider, selected_client, selected_memberid)
+    
+    #add a logout button to the sidebar
+    logout()
+#a different journey for the contact center team
+elif st.session_state['authentication_status'] and st.session_state['username'].startswith('contact'):
+    st.title('Wellness PA Code Authorisation and Results Review Portal')
+    st.write(f"You are currently logged in as {st.session_state['ProviderName']} ({st.session_state['username']})")
+    st.sidebar.title("Navigation")
+    st.sidebar.write("Welcome to the Wellness PA Code Authorisation and Results Review Portal")
+    enrollee_id = st.sidebar.text_input('Kindly input Member ID to check Eligibility and Booking Status')
+    #add a submit button
+    st.sidebar.button("Submit", key="button1", help="Click or Press Enter")
+    enrollee_id = str(enrollee_id)
+    final_submit_date = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, ''].values[0]
+
+    # if (enrollee_id in filled_wellness_df['MemberNo'].values) and (policystart <= final_submit_date <= policyend):
+    #     member_name = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'MemberName'].values[0]
+    #     clientname = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'Client'].values[0]
+    #     package = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'Wellness_benefits'].values[0]
+    #     member_email = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'email'].values[0]
+    #     provider = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'selected_provider'].values[0]
+    #     app_date = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'selected_date'].values[0]
+    #     app_session = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'selected_session'].values[0]
+    
+    
 else:
     # Display the login page
     st.title("Home Page")
