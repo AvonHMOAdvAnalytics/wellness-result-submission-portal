@@ -195,13 +195,11 @@ def send_email_with_attachment(
         msg.attach(MIMEText(body, 'html'))
 
         # Attach files
-        for file in uploaded_files:
-            file.seek(0)
-            file_data = file.read()
+        for file_name, file_data in uploaded_files:
             part = MIMEBase('application', 'octet-stream')
             part.set_payload(file_data)
             encoders.encode_base64(part)
-            part.add_header('Content-Disposition', f'attachment; filename={file.name}')
+            part.add_header('Content-Disposition', f'attachment; filename={file_name}')
             msg.attach(part)
 
         # Send the email
@@ -284,9 +282,10 @@ if st.session_state['authentication_status'] and st.session_state['username'].st
             st.write("Please enter the PACode issued for the Enrollee Wellness Test")
             pa_code = st.text_input("Enter PACode")
             st.write("Please Select the Tests Conducted on the Enrollee")
-            tests_conducted = st.multiselect("Select all Tests Conducted", options=['Physical Exam', 'Urinalysis', 'PCV', 'Blood Sugar', 'BP', 'Genotype', 'BMI',
-                                                                                'Chest X-Ray', 'Cholesterol', 'Liver Function Test', 'Electrolyte, Urea and Creatinine Test(E/U/Cr)',
-                                                                                'Stool Microscopy', 'Mammogram', 'Prostrate Specific Antigen(PSA)', 'Cervical Smear'])
+            tests_conducted = st.multiselect("Select all Tests Conducted", options=['Physical Exam', 'Urinalysis', 'PCV', 'Blood Sugar', 'BP', 'Genotype', 'BMI', 'ECG', 'Visual Acuity',
+                                                                            'Chest X-Ray', 'Cholesterol', 'Liver Function Test', 'Electrolyte, Urea and Creatinine Test(E/U/Cr)',
+                                                                            'Stool Microscopy', 'Mammogram', 'Prostrate Specific Antigen(PSA)', 'Cervical Smear', 'Stress ECG',
+                                                                            'Hepatitis B', 'Lipid Profile Test', 'Breast Scan'])
             st.write("Please Enter the Date the Tests were Conducted")
             test_date = st.date_input("Enter Test Date")
             
@@ -316,7 +315,7 @@ if st.session_state['authentication_status'] and st.session_state['username'].st
                 folder_structure = f"{provider_name}/{client_name}/{policy_end_date_str}/{member}"
 
                 # List to hold the URLs of uploaded files
-                uploaded_urls = []
+                uploaded_files = []
 
                 for file in uploaded_file:
                     # Create a unique name for the file using the original file name
@@ -332,8 +331,8 @@ if st.session_state['authentication_status'] and st.session_state['username'].st
                     # Upload the file
                     blob_client.upload_blob(file, overwrite=True)
 
-                    # Get the URL of the uploaded file and add it to the list
-                    uploaded_urls.append(blob_client.url)
+                    # Add the file name and data to the uploaded_files list for email attachment
+                    uploaded_files.append((file.name, file.getvalue()))
 
                 # URL pointing to the member's folder (just for reference, not an actual browseable URL)
                 member_folder_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{folder_structure}"
@@ -367,7 +366,7 @@ if st.session_state['authentication_status'] and st.session_state['username'].st
                         # Send an email to the enrollee with the test results attached
                         email = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['email'].values[0]
                         subject = 'AVON HMO ANNUAL TEST RESULTS'
-                        success, message = send_email_with_attachment(email, name, st.session_state['ProviderName'], test_date, subject, uploaded_file)
+                        success, message = send_email_with_attachment(email, name, st.session_state['ProviderName'], test_date, subject, uploaded_files)
                         if success:
                             st.success("Results Submitted Successfully. A copy of the results has been sent to the enrollee.")
                         else:
@@ -407,14 +406,33 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
     logout()
 #a different journey for the contact center team
 elif st.session_state['authentication_status'] and st.session_state['username'].startswith('contact'):
-    st.title('Wellness PA Code Authorisation and Results Review Portal')
-    st.write(f"You are currently logged in as {st.session_state['ProviderName']} ({st.session_state['username']})")
-    st.sidebar.title("Navigation")
-    st.sidebar.write("Welcome to the Wellness PA Code Authorisation and Results Review Portal")
-    enrollee_id = st.sidebar.text_input('Kindly input Member ID to check Eligibility and Booking Status')
+    st.markdown(f"<h2 style='color: purple;'>Wellness PA Code Authorisation and Results Review Portal</h2>", unsafe_allow_html=True)
+    # st.title('Wellness PA Code Authorisation and Results Review Portal')
+    st.markdown(
+    f"<p style='color: purple; font-size: 16px;'>"
+    f"You are currently logged in as <strong>{st.session_state['ProviderName']}</strong> "
+    f"(<strong>{st.session_state['username']}</strong>)</p>",
+    unsafe_allow_html=True
+    )
+    st.sidebar.markdown(
+    "<h2 style='color: purple;'>Navigation</h2>", 
+    unsafe_allow_html=True
+    )
+    st.sidebar.markdown(
+    "<p style='color: purple;'>Welcome to the Wellness PA Code Authorisation and Results Review Portal</p>", 
+    unsafe_allow_html=True
+    )
+    st.sidebar.markdown(
+    "<label style='color: purple;'>Kindly input Member ID to check Eligibility and Booking Status:</label>", 
+    unsafe_allow_html=True
+    )
+    enrollee_id = st.sidebar.text_input("", key="enrollee_id")
     #add a submit button
-    st.sidebar.button("Submit", key="button1", help="Click or Press Enter")
-    # enrollee_id = str(enrollee_id)
+    st.sidebar.markdown(
+    "<button style='background-color: #6a0dad; color: white; border: none; padding: 10px 20px; cursor: pointer;' "
+    "title='Click or Press Enter'>Submit</button>", 
+    unsafe_allow_html=True
+    )
 
     booking_data = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, [
             'MemberNo', 'MemberName', 'Client', 'Wellness_benefits', 'selected_provider', 'date_submitted', 'IssuedPACode', 'PA_Tests', 'PA_Provider', 'PAIssueDate'
@@ -440,7 +458,10 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
             submission_date = ''
             test_provider = ''
 
-        st.subheader(f'Most Recent Wellness Booking Details for {member_name}')
+        st.markdown(
+                    f"<h4 style='color: purple;'>Wellness Booking Details for <strong>{member_name}</strong></h4>",
+                    unsafe_allow_html=True
+                    )
         # Display the transposed table with both headers and values
         st.markdown(
             booking_data.to_html (
@@ -450,7 +471,8 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
             ),
             unsafe_allow_html=True
         )
-        st.subheader('Kindly Update Details of PA Code Issued to Provider for the Enrollee')
+        # st.subheader('Kindly Update Details of PA Code Issued to Provider for the Enrollee')
+        st.markdown(f"<h4 style='color: purple;'>Kindly Update Details of PA Code Issued to Provider for the Enrollee</h4>", unsafe_allow_html=True)
          #create a form to upload PA details for the selected enrollee
         pacode = st.text_input('Input the Generated PA Code')
         pa_tests = st.multiselect('Select the Tests Conducted', options=['Physical Exam', 'Urinalysis', 'PCV', 'Blood Sugar', 'BP', 'Genotype', 'BMI', 'ECG', 'Visual Acuity',
@@ -495,7 +517,7 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
 
         if enrollee_id in wellness_result_df['memberno'].values:
             st.sidebar.markdown(
-                f'<div style="color: green; font-weight: bold;">'
+                f'<div style="color: purple; font-weight: bold;">'
                 f'The Wellness Results for {member_name} done by {test_provider} has been submitted and sent to {member_email} on {submission_date}'
                 f'</div>',
                 unsafe_allow_html=True
@@ -504,11 +526,13 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
             if st.session_state['username'] == 'contactcenter_admin':
                 #concatenate the enrollee_id and member_name seperated by a hyphen
                 member = f'{enrollee_id} - {member_name}'
-                st.markdown(f"<h3 style='color: green;'>Find below the Wellness Test Results for {member}</h3>", unsafe_allow_html=True)
+                dateoftest = wellness_result_df.loc[wellness_result_df['memberno'] == enrollee_id, 'test_date'].values[0]
+                provider_nm = wellness_result_df.loc[wellness_result_df['memberno'] == enrollee_id, 'providername'].values[0]
+                st.markdown(f"<h3 style='color: purple;'>Find below the Wellness Test Results for {member}</h3>", unsafe_allow_html=True)
                 display_member_results(conn_str, 'annual-wellness-results', test_provider, clientname, member,policy_end)
 
                 #create a form to input email address of the enrollee to send the test results
-                st.markdown(f"<h4 style='color: green;'>Input the Enrollee's Email Below to Send Test Result</h4>", unsafe_allow_html=True)
+                st.markdown(f"<h4 style='color: purple;'>Input the Enrollee's Email Below to Send Test Result</h4>", unsafe_allow_html=True)
                 st.info('Please review the results to ensure it matches the enrollee records before sending to the Enrollee')
                 new_email = st.text_input('Enter Enrollee Email Address')
                 #add a send button to send the email
@@ -517,17 +541,22 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
                 if send_email:
                     #assign the results of the enrollee to a variable
                     uploaded_files = []
-                    blob_service_client = BlobServiceClient.from_connection_string(st.secrets['conn_str'])
+                    blob_service_client = BlobServiceClient.from_connection_string(conn_str)
                     container_client = blob_service_client.get_container_client('annual-wellness-results')
                     # member_folder = f"{provider_folder}/{client_folder}/{policy_end_date_str}/{selected_member.strip()}"
                     blobs = container_client.list_blobs(name_starts_with=f"{test_provider.replace(' ', '').lower()}/{clientname.replace(' ', '').lower()}/{policy_end_str}/{member}")
 
                     for blob in blobs:
                         blob_client = container_client.get_blob_client(blob)
-                        file_stream = blob_client.download_blob().readall()
-                        uploaded_files.append(file_stream)
+                        file_data = blob_client.download_blob().readall()
+                        uploaded_files.append((blob.name.split('/')[-1], file_data))
 
-                    send_email_with_attachment(new_email, member_name, test_provider, submission_date, 'AVON HMO ANNUAL TEST RESULTS', uploaded_files)
+                    subject = 'AVON HMO ANNUAL TEST RESULTS'
+                    success, message = send_email_with_attachment(new_email, member_name, provider_nm, dateoftest, subject, uploaded_files)
+                    if success:
+                        st.success("A copy of the results has been sent to the enrollee.")
+                    else:
+                        st.error(message)
 
 
         else:
