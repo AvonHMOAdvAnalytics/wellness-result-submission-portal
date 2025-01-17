@@ -35,16 +35,16 @@ conn = pyodbc.connect(
         + password
         )
 
-# conn = pyodbc.connect(
-#         'DRIVER={ODBC Driver 17 for SQL Server};SERVER='
-#         +st.secrets['server']
-#         +';DATABASE='
-#         +st.secrets['database']
-#         +';UID='
-#         +st.secrets['username']
-#         +';PWD='
-#         +st.secrets['password']
-#         )
+conn = pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};SERVER='
+        +st.secrets['server']
+        +';DATABASE='
+        +st.secrets['database']
+        +';UID='
+        +st.secrets['username']
+        +';PWD='
+        +st.secrets['password']
+        )
 
 query1 = "SELECT * from vw_wellness_enrollee_portal_update"
 query2 = "select MemberNo, MemberName, Client, PolicyEndDate, email, state, selected_provider, Wellness_benefits, selected_date, selected_session, date_submitted,\
@@ -313,7 +313,7 @@ if st.session_state['authentication_status'] and st.session_state['username'].st
                 # member_folder = f"{year_folder}/{member}"
                 # Create the folder structure: provider_name/client_name/policyenddate/member_folder
                 policy_end_date_str = policyenddate.strftime("%Y-%m-%d")  # Convert policyenddate to a string
-                folder_structure = f"{provider_name}/{client_name}/{policy_end_date_str}/{name}"
+                folder_structure = f"{provider_name}/{client_name}/{policy_end_date_str}/{member}"
 
                 # List to hold the URLs of uploaded files
                 uploaded_urls = []
@@ -405,142 +405,145 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
     
     #add a logout button to the sidebar
     logout()
-# #a different journey for the contact center team
-# elif st.session_state['authentication_status'] and st.session_state['username'].startswith('contact'):
-#     st.title('Wellness PA Code Authorisation and Results Review Portal')
-#     st.write(f"You are currently logged in as {st.session_state['ProviderName']} ({st.session_state['username']})")
-#     st.sidebar.title("Navigation")
-#     st.sidebar.write("Welcome to the Wellness PA Code Authorisation and Results Review Portal")
-#     enrollee_id = st.sidebar.text_input('Kindly input Member ID to check Eligibility and Booking Status')
-#     #add a submit button
-#     st.sidebar.button("Submit", key="button1", help="Click or Press Enter")
-#     # enrollee_id = str(enrollee_id)
+#a different journey for the contact center team
+elif st.session_state['authentication_status'] and st.session_state['username'].startswith('contact'):
+    st.title('Wellness PA Code Authorisation and Results Review Portal')
+    st.write(f"You are currently logged in as {st.session_state['ProviderName']} ({st.session_state['username']})")
+    st.sidebar.title("Navigation")
+    st.sidebar.write("Welcome to the Wellness PA Code Authorisation and Results Review Portal")
+    enrollee_id = st.sidebar.text_input('Kindly input Member ID to check Eligibility and Booking Status')
+    #add a submit button
+    st.sidebar.button("Submit", key="button1", help="Click or Press Enter")
+    # enrollee_id = str(enrollee_id)
 
-#     booking_data = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, [
-#             'MemberNo', 'MemberName', 'Client', 'Wellness_benefits', 'selected_provider', 'date_submitted', 'IssuedPACode', 'PA_Tests', 'PA_Provider', 'PAIssueDate'
-#             ]].reset_index(drop=True).transpose()
+    booking_data = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, [
+            'MemberNo', 'MemberName', 'Client', 'Wellness_benefits', 'selected_provider', 'date_submitted', 'IssuedPACode', 'PA_Tests', 'PA_Provider', 'PAIssueDate'
+            ]].reset_index(drop=True).transpose()
    
-#     # final_submit_date = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'date_submitted'].values[0]
-#     # policystart = wellness_df.loc[wellness_df['memberno'] == enrollee_id, 'PolicyStartDate'].values[0]
-#     # policyend = wellness_df.loc[wellness_df['memberno'] == enrollee_id, 'PolicyEndDate'].values[0]
+    # final_submit_date = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'date_submitted'].values[0]
+    # policystart = wellness_df.loc[wellness_df['memberno'] == enrollee_id, 'PolicyStartDate'].values[0]
+    # policyend = wellness_df.loc[wellness_df['memberno'] == enrollee_id, 'PolicyEndDate'].values[0]
 
-#     if (enrollee_id in filled_wellness_df['MemberNo'].values):
-#         member_name = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'MemberName'].values[0]
-#         clientname = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'Client'].values[0]
-#         package = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'Wellness_benefits'].values[0]
-#         member_email = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'email'].values[0]
-#         provider = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'selected_provider'].values[0]
-#         app_date = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'selected_date'].values[0]
-#         if enrollee_id in wellness_result_df['memberno'].values:
-#             submission_date = wellness_result_df.loc[wellness_result_df['memberno'] == enrollee_id, 'date_submitted'].values[0]
-#             test_provider = wellness_result_df.loc[wellness_result_df['memberno'] == enrollee_id, 'providername'].values[0]
-#         else:
-#             submission_date = ''
-#             test_provider = ''
+    if (enrollee_id in filled_wellness_df['MemberNo'].values):
+        member_name = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'MemberName'].values[0]
+        clientname = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'Client'].values[0]
+        package = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'Wellness_benefits'].values[0]
+        member_email = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'email'].values[0]
+        provider = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'selected_provider'].values[0]
+        app_date = filled_wellness_df.loc[filled_wellness_df['MemberNo'] == enrollee_id, 'selected_date'].values[0]
+        policy_end = recent_filled_wellness_df[recent_filled_wellness_df['MemberNo'] == enrollee_id]['PolicyEndDate'].values[0]
+        policy_end_str = policy_end.strftime("%Y-%m-%d")
+        if enrollee_id in wellness_result_df['memberno'].values:
+            submission_date = wellness_result_df.loc[wellness_result_df['memberno'] == enrollee_id, 'date_submitted'].values[0]
+            test_provider = wellness_result_df.loc[wellness_result_df['memberno'] == enrollee_id, 'providername'].values[0]
+        else:
+            submission_date = ''
+            test_provider = ''
 
-#         st.subheader(f'Most Recent Wellness Booking Details for {member_name}')
-#         # Display the transposed table with both headers and values
-#         st.markdown(
-#             booking_data.to_html (
-#                 header=False,  # Include column headers
-#                 index=True,   # Include the original headers as the index
-#                 escape=False, # Render HTML correctly
-#             ),
-#             unsafe_allow_html=True
-#         )
-#         st.subheader('Kindly Update Details of PA Code Issued to Provider for the Enrollee')
-#          #create a form to upload PA details for the selected enrollee
-#         pacode = st.text_input('Input the Generated PA Code')
-#         pa_tests = st.multiselect('Select the Tests Conducted', options=['Physical Exam', 'Urinalysis', 'PCV', 'Blood Sugar', 'BP', 'Genotype', 'BMI', 'ECG', 'Visual Acuity',
-#                                                                             'Chest X-Ray', 'Cholesterol', 'Liver Function Test', 'Electrolyte, Urea and Creatinine Test(E/U/Cr)',
-#                                                                             'Stool Microscopy', 'Mammogram', 'Prostrate Specific Antigen(PSA)', 'Cervical Smear', 'Stress ECG',
-#                                                                             'Hepatitis B', 'Lipid Profile Test', 'Breast Scan']
-#                                                                             )
-#         # Convert pa_tests list to a comma-separated string
-#         pa_tests_str = ','.join(pa_tests)
-#         wellness_providers = wellness_providers['ProviderName'].unique()
-#         added_providers = ['MECURE HEALTHCARE, OSHODI', 'MECURE HEALTHCARE, LEKKI', 'CLINIX HEALTHCARE', 'TEEKAY HOSPITAL LIMITED']
-#         wellness_providers = list(wellness_providers) + added_providers
-#         pa_provider = st.selectbox('Select the Wellness Provider', placeholder = 'Select Provider', index = None, options = wellness_providers)
-#         pa_issue_date = st.date_input('Select the Date the PA was Issued')
+        st.subheader(f'Most Recent Wellness Booking Details for {member_name}')
+        # Display the transposed table with both headers and values
+        st.markdown(
+            booking_data.to_html (
+                header=False,  # Include column headers
+                index=True,   # Include the original headers as the index
+                escape=False, # Render HTML correctly
+            ),
+            unsafe_allow_html=True
+        )
+        st.subheader('Kindly Update Details of PA Code Issued to Provider for the Enrollee')
+         #create a form to upload PA details for the selected enrollee
+        pacode = st.text_input('Input the Generated PA Code')
+        pa_tests = st.multiselect('Select the Tests Conducted', options=['Physical Exam', 'Urinalysis', 'PCV', 'Blood Sugar', 'BP', 'Genotype', 'BMI', 'ECG', 'Visual Acuity',
+                                                                            'Chest X-Ray', 'Cholesterol', 'Liver Function Test', 'Electrolyte, Urea and Creatinine Test(E/U/Cr)',
+                                                                            'Stool Microscopy', 'Mammogram', 'Prostrate Specific Antigen(PSA)', 'Cervical Smear', 'Stress ECG',
+                                                                            'Hepatitis B', 'Lipid Profile Test', 'Breast Scan']
+                                                                            )
+        # Convert pa_tests list to a comma-separated string
+        pa_tests_str = ','.join(pa_tests)
+        wellness_providers = wellness_providers['ProviderName'].unique()
+        added_providers = ['MECURE HEALTHCARE, OSHODI', 'MECURE HEALTHCARE, LEKKI', 'CLINIX HEALTHCARE', 'TEEKAY HOSPITAL LIMITED']
+        wellness_providers = list(wellness_providers) + added_providers
+        pa_provider = st.selectbox('Select the Wellness Provider', placeholder = 'Select Provider', index = None, options = wellness_providers)
+        pa_issue_date = st.date_input('Select the Date the PA was Issued')
 
-#          #add a submit button
-#         proceed = st.button("PROCEED", help="Click to proceed")
-#         if proceed:
-#             #initialize an empty list to store empty fields
-#             empty_fields = []
-#             #check if any of the fields is empty
-#             if pacode == '':
-#                 empty_fields.append('PA Code')
-#             if len(pa_tests) == 0:
-#                 empty_fields.append('Tests Conducted')
-#             if pa_provider == 'Select Provider':
-#                 empty_fields.append('Provider')
-#             #check the content of the empty_fields list and display the appropriate message
-#             if len(empty_fields) > 0:
-#                 st.error(f'Please fill the following field(s): {", ".join(empty_fields)}')
-#             else:
-#                 #insert the generated PA code into the tbl_annual_wellness_enrollee_data on the database
-#                 cursor = conn.cursor()
-#                 query = """
-#                 UPDATE tbl_annual_wellness_enrollee_data
-#                 SET IssuedPACode = ?, PA_Tests = ?, PA_Provider = ?, PAIssueDate = ?
-#                 WHERE MemberNo = ? and date_submitted = (select max(date_submitted) from tbl_annual_wellness_enrollee_data where MemberNo = ?)
-#                 """
-#                 cursor.execute(query, pacode, pa_tests_str, pa_provider, pa_issue_date, enrollee_id, enrollee_id)
-#                 conn.commit()
-#                 st.success('PA Code has been successfully updated for the enrollee')
+         #add a submit button
+        proceed = st.button("PROCEED", help="Click to proceed")
+        if proceed:
+            #initialize an empty list to store empty fields
+            empty_fields = []
+            #check if any of the fields is empty
+            if pacode == '':
+                empty_fields.append('PA Code')
+            if len(pa_tests) == 0:
+                empty_fields.append('Tests Conducted')
+            if pa_provider == 'Select Provider':
+                empty_fields.append('Provider')
+            #check the content of the empty_fields list and display the appropriate message
+            if len(empty_fields) > 0:
+                st.error(f'Please fill the following field(s): {", ".join(empty_fields)}')
+            else:
+                #insert the generated PA code into the tbl_annual_wellness_enrollee_data on the database
+                cursor = conn.cursor()
+                query = """
+                UPDATE tbl_annual_wellness_enrollee_data
+                SET IssuedPACode = ?, PA_Tests = ?, PA_Provider = ?, PAIssueDate = ?
+                WHERE MemberNo = ? and date_submitted = (select max(date_submitted) from tbl_annual_wellness_enrollee_data where MemberNo = ?)
+                """
+                cursor.execute(query, pacode, pa_tests_str, pa_provider, pa_issue_date, enrollee_id, enrollee_id)
+                conn.commit()
+                st.success('PA Code has been successfully updated for the enrollee')
 
-#         if enrollee_id in wellness_result_df['memberno'].values:
-#             st.sidebar.markdown(
-#                 f'<div style="color: green; font-weight: bold;">'
-#                 f'The Wellness Results for {member_name} done by {test_provider} has been submitted and sent to {member_email} on {submission_date}'
-#                 f'</div>',
-#                 unsafe_allow_html=True
-#             )
-#             #create a view of the result for only login with admin credentials
-#             if st.session_state['username'] == 'contactcenter_admin':
-#                 #concatenate the enrollee_id and member_name seperated by a hyphen
-#                 member = f'{enrollee_id} - {member_name}'
-#                 st.markdown(f"<h3 style='color: green;'>Find below the Wellness Test Results for {member}</h3>", unsafe_allow_html=True)
-#                 display_member_results(st.secrets['conn_str'], 'annual-wellness-results', test_provider, clientname, member)
+        if enrollee_id in wellness_result_df['memberno'].values:
+            st.sidebar.markdown(
+                f'<div style="color: green; font-weight: bold;">'
+                f'The Wellness Results for {member_name} done by {test_provider} has been submitted and sent to {member_email} on {submission_date}'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+            #create a view of the result for only login with admin credentials
+            if st.session_state['username'] == 'contactcenter_admin':
+                #concatenate the enrollee_id and member_name seperated by a hyphen
+                member = f'{enrollee_id} - {member_name}'
+                st.markdown(f"<h3 style='color: green;'>Find below the Wellness Test Results for {member}</h3>", unsafe_allow_html=True)
+                display_member_results(conn_str, 'annual-wellness-results', test_provider, clientname, member,policy_end)
 
-#                 #create a form to input email address of the enrollee to send the test results
-#                 st.markdown(f"<h4 style='color: green;'>Input the Enrollee's Email Below to Send Test Result</h4>", unsafe_allow_html=True)
-#                 st.info('Please review the results to ensure it matches the enrollee records before sending to the Enrollee')
-#                 new_email = st.text_input('Enter Enrollee Email Address')
-#                 #add a send button to send the email
-#                 send_email = st.button('Send Email')
-#                 #send the email to the enrollee
-#                 if send_email:
-#                     #assign the results of the enrollee to a variable
-#                     uploaded_files = []
-#                     blob_service_client = BlobServiceClient.from_connection_string(st.secrets['conn_str'])
-#                     container_client = blob_service_client.get_container_client('annual-wellness-results')
-#                     blobs = container_client.list_blobs(name_starts_with=f"{test_provider.replace(' ', '').lower()}/{datetime.now().year - 1}/{clientname.replace(' ', '').lower()}/{member}")
+                #create a form to input email address of the enrollee to send the test results
+                st.markdown(f"<h4 style='color: green;'>Input the Enrollee's Email Below to Send Test Result</h4>", unsafe_allow_html=True)
+                st.info('Please review the results to ensure it matches the enrollee records before sending to the Enrollee')
+                new_email = st.text_input('Enter Enrollee Email Address')
+                #add a send button to send the email
+                send_email = st.button('Send Email')
+                #send the email to the enrollee
+                if send_email:
+                    #assign the results of the enrollee to a variable
+                    uploaded_files = []
+                    blob_service_client = BlobServiceClient.from_connection_string(st.secrets['conn_str'])
+                    container_client = blob_service_client.get_container_client('annual-wellness-results')
+                    # member_folder = f"{provider_folder}/{client_folder}/{policy_end_date_str}/{selected_member.strip()}"
+                    blobs = container_client.list_blobs(name_starts_with=f"{test_provider.replace(' ', '').lower()}/{clientname.replace(' ', '').lower()}/{policy_end_str}/{member}")
 
-#                     for blob in blobs:
-#                         blob_client = container_client.get_blob_client(blob)
-#                         file_stream = blob_client.download_blob().readall()
-#                         uploaded_files.append(file_stream)
+                    for blob in blobs:
+                        blob_client = container_client.get_blob_client(blob)
+                        file_stream = blob_client.download_blob().readall()
+                        uploaded_files.append(file_stream)
 
-#                     send_email_with_attachment(new_email, member_name, test_provider, submission_date, 'AVON HMO ANNUAL TEST RESULTS', uploaded_files)
+                    send_email_with_attachment(new_email, member_name, test_provider, submission_date, 'AVON HMO ANNUAL TEST RESULTS', uploaded_files)
 
 
-#         else:
-#             st.sidebar.markdown(
-#                 f'<div style="color: red; font-weight: bold;">'
-#                 f'The Wellness Results for {member_name} has not been submitted, kindly follow up with the provider to submit the results'
-#                 f'</div>',
-#                 unsafe_allow_html=True
-#             )
-#     elif (enrollee_id in wellness_df['memberno'].values) and (enrollee_id not in filled_wellness_df['MemberNo'].values):
-#         st.sidebar.error('Enrollee is yet to book for a wellness test. Kindly advise the Enrollee to Book a Wellness Test via the Wellness Portal')
-#     else:
-#         st.sidebar.error('Invalid Member ID or Enrollee is not eligible for Wellness Test')
+        else:
+            st.sidebar.markdown(
+                f'<div style="color: red; font-weight: bold;">'
+                f'The Wellness Results for {member_name} has not been submitted, kindly follow up with the provider to submit the results'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+    elif (enrollee_id in wellness_df['memberno'].values) and (enrollee_id not in filled_wellness_df['MemberNo'].values):
+        st.sidebar.error('Enrollee is yet to book for a wellness test. Kindly advise the Enrollee to Book a Wellness Test via the Wellness Portal')
+    else:
+        st.sidebar.error('Invalid Member ID or Enrollee is not eligible for Wellness Test')
 
-#     #logout
-#     logout()
+    #logout
+    logout()
         
 
     
