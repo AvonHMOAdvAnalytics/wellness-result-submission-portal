@@ -35,16 +35,16 @@ conn = pyodbc.connect(
         + password
         )
 
-conn = pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};SERVER='
-        +st.secrets['server']
-        +';DATABASE='
-        +st.secrets['database']
-        +';UID='
-        +st.secrets['username']
-        +';PWD='
-        +st.secrets['password']
-        )
+# conn = pyodbc.connect(
+#         'DRIVER={ODBC Driver 17 for SQL Server};SERVER='
+#         +st.secrets['server']
+#         +';DATABASE='
+#         +st.secrets['database']
+#         +';UID='
+#         +st.secrets['username']
+#         +';PWD='
+#         +st.secrets['password']
+#         )
 
 query1 = "SELECT * from vw_wellness_enrollee_portal_update"
 query2 = "select MemberNo, MemberName, Client, PolicyEndDate, email, state, selected_provider, Wellness_benefits, selected_date, selected_session, date_submitted,\
