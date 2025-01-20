@@ -35,16 +35,16 @@ conn = pyodbc.connect(
         + password
         )
 
-# conn = pyodbc.connect(
-#         'DRIVER={ODBC Driver 17 for SQL Server};SERVER='
-#         +st.secrets['server']
-#         +';DATABASE='
-#         +st.secrets['database']
-#         +';UID='
-#         +st.secrets['username']
-#         +';PWD='
-#         +st.secrets['password']
-#         )
+conn = pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};SERVER='
+        +st.secrets['server']
+        +';DATABASE='
+        +st.secrets['database']
+        +';UID='
+        +st.secrets['username']
+        +';PWD='
+        +st.secrets['password']
+        )
 
 query1 = "SELECT * from vw_wellness_enrollee_portal_update"
 query2 = "select MemberNo, MemberName, Client, PolicyEndDate, email, state, selected_provider, Wellness_benefits, selected_date, selected_session, date_submitted,\
@@ -290,7 +290,8 @@ if st.session_state['authentication_status'] and st.session_state['username'].st
             test_date = st.date_input("Enter Test Date")
             
             name = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['MemberName'].values[0]
-            policyenddate = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['PolicyEndDate'].values[0]
+            policyenddate = filled_wellness_df[filled_wellness_df['MemberNo'] == member_no]['PolicyEndDate'].values[-1]
+            # st.write(policyenddate)
             #create a image uploader for the test results
             uploaded_file = st.file_uploader("Upload Test Results", accept_multiple_files=True)
             #store the uploaded files in a blob storage and return the url
