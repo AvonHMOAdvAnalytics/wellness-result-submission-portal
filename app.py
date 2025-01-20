@@ -426,7 +426,7 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
     "<label style='color: purple;'>Kindly input Member ID to check Eligibility and Booking Status:</label>", 
     unsafe_allow_html=True
     )
-    enrollee_id = st.sidebar.text_input("", key="enrollee_id")
+    enrollee_id = st.sidebar.text_input("", key="enrollee_id",placeholder='Enter Member ID here')
     #add a submit button
     st.sidebar.markdown(
     "<button style='background-color: #6a0dad; color: white; border: none; padding: 10px 20px; cursor: pointer;' "
@@ -517,7 +517,7 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
 
         if enrollee_id in wellness_result_df['memberno'].values:
             st.sidebar.markdown(
-                f'<div style="color: purple; font-weight: bold;">'
+                f'<div style="color: green; font-weight: bold;">'
                 f'The Wellness Results for {member_name} done by {test_provider} has been submitted and sent to {member_email} on {submission_date}'
                 f'</div>',
                 unsafe_allow_html=True
