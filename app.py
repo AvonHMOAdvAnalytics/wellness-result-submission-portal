@@ -479,7 +479,8 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
         pa_tests = st.multiselect('Select the Tests Conducted', options=['Physical Exam', 'Urinalysis', 'PCV', 'Blood Sugar', 'BP', 'Genotype', 'BMI', 'ECG', 'Visual Acuity',
                                                                             'Chest X-Ray', 'Cholesterol', 'Liver Function Test', 'Electrolyte, Urea and Creatinine Test(E/U/Cr)',
                                                                             'Stool Microscopy', 'Mammogram', 'Prostrate Specific Antigen(PSA)', 'Cervical Smear', 'Stress ECG',
-                                                                            'Hepatitis B', 'Lipid Profile Test', 'Breast Scan']
+                                                                            'Hepatitis B', 'Lipid Profile Test', 'Breast Scan', 'Prostrate Cancer Screening', 'Lung Function',
+                                                                            'Cardiac Risk Assessment', 'Hearing Test']
                                                                             )
         # Convert pa_tests list to a comma-separated string
         pa_tests_str = ','.join(pa_tests)
