@@ -485,7 +485,7 @@ elif st.session_state['authentication_status'] and st.session_state['username'].
         # Convert pa_tests list to a comma-separated string
         pa_tests_str = ','.join(pa_tests)
         wellness_providers = wellness_providers['ProviderName'].unique()
-        added_providers = ['MECURE HEALTHCARE, OSHODI', 'MECURE HEALTHCARE, LEKKI', 'CLINIX HEALTHCARE', 'TEEKAY HOSPITAL LIMITED']
+        added_providers = ['MECURE HEALTHCARE, OSHODI', 'MECURE HEALTHCARE, LEKKI', 'CLINIX HEALTHCARE', 'TEEKAY HOSPITAL LIMITED', 'KANEM HOSPITAL AND MATERNITY']
         wellness_providers = list(wellness_providers) + added_providers
         pa_provider = st.selectbox('Select the Wellness Provider', placeholder = 'Select Provider', index = None, options = wellness_providers)
         pa_issue_date = st.date_input('Select the Date the PA was Issued')
